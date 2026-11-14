@@ -1,0 +1,11 @@
+# Tooling binaries and downloads
+tools/node/
+tools/*.zip
+tools/*.part
+
+# Local analysis of the store build (third-party artefact, not published)
+analysis/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db

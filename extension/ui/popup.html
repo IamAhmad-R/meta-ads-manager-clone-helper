@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meta Ads Manager Clone Helper</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="../icons/icon48.png" alt="" width="24" height="24" />
+      <div>
+        <div class="brand-name">Ads Manager Clone Helper</div>
+        <div class="brand-sub">Bulk creative ops for Meta Ads</div>
+      </div>
+    </div>
+    <button id="openOptions" class="icon-btn" title="Settings" aria-label="Settings">⚙</button>
+  </header>
+
+  <main class="content">
+    <section class="card" id="selectionCard">
+      <div class="card-head">
+        <div>
+          <div class="card-title" id="selectionTitle">No ads selected</div>
+          <div class="card-sub" id="selectionSub">Select ads in Ads Manager to begin.</div>
+        </div>
+        <div class="head-actions">
+          <button id="refresh" class="icon-btn" title="Re-read the current tab" aria-label="Refresh">⟳</button>
+          <button id="toggleManual" class="link">Enter IDs manually</button>
+        </div>
+      </div>
+
+      <div class="notice" id="hashNotice" hidden>
+        Meta replaced the selection with a hash, so individual ad IDs cannot be read from the URL.
+        Use <strong>Enter IDs manually</strong>.
+      </div>
+
+      <div class="ad-names" id="adNames" hidden></div>
+
+      <div class="manual" id="manualWrap" hidden>
+        <textarea id="manualIds" rows="4" spellcheck="false"
+          placeholder="Paste ad IDs separated by commas, spaces or new lines"></textarea>
+        <div class="manual-actions">
+          <button id="applyManual" class="secondary">Use these IDs</button>
+          <button id="cancelManual" class="link">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="actions" id="actions">
+      <button class="action primary" data-feature="enhancements">
+        <span class="action-title">Turn off creative enhancements</span>
+        <span class="action-sub">Rebuild each creative with every enhancement opted out</span>
+      </button>
+      <button class="action" data-feature="previews">
+        <span class="action-title">Get previews, post IDs and export</span>
+        <span class="action-sub">Preview links, post IDs, ad set and campaign names as CSV</span>
+      </button>
+      <button class="action" data-feature="carousel">
+        <span class="action-title">Convert carousel to placement assets</span>
+        <span class="action-sub">First half feeds the feed, second half feeds Stories / Reels</span>
+      </button>
+      <button class="action" data-feature="duplicate">
+        <span class="action-title">Duplicate ads into ad sets</span>
+        <span class="action-sub">Reuse the same creative ID, without “- Copy”</span>
+      </button>
+    </section>
+
+    <section class="table-view" id="tableView" hidden>
+      <div class="table-head">
+        <button id="backToMain" class="link">← Back</button>
+        <div class="table-actions">
+          <button id="copyCsv" class="secondary small">Copy CSV</button>
+          <button id="copyPostIds" class="secondary small">Copy post IDs</button>
+          <button id="openSheet" class="secondary small">Open in Sheets</button>
+          <button id="downloadCsv" class="secondary small">Download CSV</button>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table id="previewTable">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="hint" id="tableHint"></div>
+    </section>
+
+    <div id="status" class="status" hidden></div>
+  </main>
+
+  <footer class="footer">
+    <span id="sessionState">Session: unknown</span>
+    <span class="footer-sep">·</span>
+    <span id="versionLabel">v—</span>
+    <span class="footer-sep">·</span>
+    <a href="#" id="footerOptions">Settings</a>
+  </footer>
+
+  <div class="busy" id="busy" hidden>
+    <div class="busy-card">
+      <div class="spinner" aria-hidden="true"></div>
+      <div id="busyText">Working…</div>
+      <div class="busy-sub" id="busySub"></div>
+    </div>
+  </div>
+
+  <dialog id="placementDialog" class="sheet">
+    <form method="dialog">
+      <h2>Select placements</h2>
+      <p class="hint">
+        The first half of the carousel cards becomes the default feed carousel. The second half
+        becomes the vertical carousel for every placement you tick below. Cards are never reordered
+        inside a carousel.
+      </p>
+      <div id="placementList" class="check-list"></div>
+      <div class="dialog-actions">
+        <button value="cancel" class="secondary">Cancel</button>
+        <button id="confirmPlacements" value="go" class="primary">Continue</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="duplicateDialog" class="sheet wide">
+    <div class="dialog-body">
+      <h2>Duplicate ads</h2>
+      <div class="row gap">
+        <input id="adsetSearch" type="search" placeholder="Search ad sets" />
+        <select id="statusFilter" aria-label="Ad set status">
+          <option value="">All statuses</option>
+          <option value="ACTIVE">Active</option>
+          <option value="PAUSED">Paused</option>
+          <option value="ARCHIVED">Archived</option>
+        </select>
+      </div>
+      <div class="row between select-all-row">
+        <label class="select-all"><input type="checkbox" id="selectAllAdsets" /> Select all loaded</label>
+        <span class="hint" id="loadedCount"></span>
+      </div>
+      <div class="adset-list" id="adsetList">
+        <div class="hint">Loading ad sets…</div>
+      </div>
+      <div class="row gap between">
+        <button id="loadMoreAdsets" class="link" hidden>Load more</button>
+        <span class="hint" id="dupSummary">Select at least one ad set.</span>
+      </div>
+      <div class="dialog-actions">
+        <button id="cancelDuplicate" class="secondary">Cancel</button>
+        <button id="confirmDuplicate" class="primary" disabled>Duplicate</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="resultDialog" class="sheet">
+    <form method="dialog">
+      <h2 id="resultTitle">Done</h2>
+      <div id="resultBody" class="result-body"></div>
+      <div class="dialog-actions">
+        <button id="reloadAfterRun" class="secondary" type="button" hidden>Hard reload Ads Manager</button>
+        <button id="copyResultDetails" class="secondary" type="button" hidden>Copy details</button>
+        <button value="close" class="primary">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="confirmEnhanceDialog" class="sheet">
+    <form method="dialog">
+      <h2>Turn off creative enhancements?</h2>
+      <p class="hint">
+        This will make changes to all of your selected ads and may reset the learning phase
+        and social proof. Are you sure?
+      </p>
+      <p class="hint" id="confirmEnhanceCount"></p>
+      <div class="dialog-actions">
+        <button value="cancel" class="secondary">Cancel</button>
+        <button value="go" class="primary">Yes, continue</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="skipDialog" class="sheet">
+    <form method="dialog">
+      <h2>Skip this ad?</h2>
+      <p id="skipReason" class="hint"></p>
+      <div class="dialog-actions">
+        <button value="cancel" class="secondary">Stop the batch</button>
+        <button value="skip" class="primary">Skip and continue</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

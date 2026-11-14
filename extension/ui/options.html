@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meta Ads Manager Clone Helper — Settings</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>Meta Ads Manager Clone Helper</h1>
+      <p class="sub">Settings apply instantly and sync through your Chrome profile.</p>
+    </header>
+
+    <section class="panel">
+      <h2>Personalised destinations</h2>
+      <p class="sub">
+        Choose which “Personalised destinations” features are turned off when you remove
+        creative enhancements. Meta sends people to the experience most likely to convert
+        after they click your ad. All three are on by default — turn a switch off to leave
+        that feature untouched.
+      </p>
+
+      <label class="switch-row">
+        <input type="checkbox" id="pdOptimizeWebsiteDestination" />
+        <span>
+          <strong>Turn off “Optimise website destination”</strong>
+          <small>Sets <code>destination_spec.website.optimization.status</code> to <code>OPT_OUT</code> when the ad carries it.</small>
+        </span>
+      </label>
+
+      <label class="switch-row">
+        <input type="checkbox" id="pdProductBrowsing" />
+        <span>
+          <strong>Turn off “Product browsing”</strong>
+          <small>Opts out in the creative feature spec (always) and in <code>destination_spec.native_commerce_experience</code>.</small>
+        </span>
+      </label>
+
+      <label class="switch-row">
+        <input type="checkbox" id="pdBrowserAddons" />
+        <span>
+          <strong>Turn off “Browser add-ons”</strong>
+          <small>Drops Meta's auto-paired Call button (<code>call_ads_configuration</code>) from the asset feed.</small>
+        </span>
+      </label>
+    </section>
+
+    <section class="panel">
+      <h2>Interface</h2>
+      <label class="switch-row">
+        <input type="checkbox" id="sidebarMode" />
+        <span>
+          <strong>Open as an in-page sidebar</strong>
+          <small>Clicking the toolbar icon slides a 500px panel over Ads Manager instead of opening a popup.</small>
+        </span>
+      </label>
+    </section>
+
+    <section class="panel">
+      <h2>Speed and refresh</h2>
+      <p class="sub">
+        Each ad costs 3 Graph calls (read creative, create creative, update ad), plus one
+        read-back when verification is on. Parallel calls shorten long batches, but every
+        mutation counts against Meta's ad-account rate limit.
+      </p>
+
+      <label class="switch-row">
+        <span>
+          <strong>Parallel requests</strong>
+          <small>2 is the safe default. Drop to 1 if Meta returns rate-limit errors; 3–4 only for small batches.</small>
+        </span>
+        <select id="concurrency">
+          <option value="1">1 — serial</option>
+          <option value="2">2 — balanced</option>
+          <option value="3">3 — fast</option>
+          <option value="4">4 — aggressive</option>
+        </select>
+      </label>
+
+      <label class="switch-row">
+        <input type="checkbox" id="preserveSocialProof" />
+        <span>
+          <strong>Keep likes and comments</strong>
+          <small>Rebuild the creative on the ad's existing post (<code>object_story_id</code>) instead of creating a new post. If Meta refuses the reuse, a new post is created and the ad is flagged in the results.</small>
+        </span>
+      </label>
+
+      <label class="switch-row">
+        <input type="checkbox" id="verifyCreatives" />
+        <span>
+          <strong>Verify every creative</strong>
+          <small>Read each new creative back and list any key Meta did not keep. Adds one call per ad.</small>
+        </span>
+      </label>
+
+      <label class="switch-row">
+        <input type="checkbox" id="autoRefresh" />
+        <span>
+          <strong>Hard-reload Ads Manager after a batch</strong>
+          <small>Reloads the tab with a cache bypass as soon as the results dialog closes. The selection in the URL survives. Turn off if you prefer to refresh manually.</small>
+        </span>
+      </label>
+    </section>
+
+    <section class="panel">
+      <h2>Creative enhancements</h2>
+      <p class="sub">
+        <span id="enhancementCount">0</span> enhancement keys are managed on each processed ad.
+        Product browsing follows its switch below; catalog-only keys are sent only for catalog creatives.
+      </p>
+      <details>
+        <summary>Show the key list</summary>
+        <ul class="keys" id="enhancementList"></ul>
+      </details>
+    </section>
+
+    <section class="panel">
+      <h2>Recent enhancement runs</h2>
+      <p class="sub">
+        Each run records the creative and post it replaced, so a post that lost its link can be
+        found again. Stored locally in this browser, last 500 runs.
+      </p>
+      <div id="enhancementLog" class="log-list"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Session</h2>
+      <p class="sub">
+        The Ads Manager access token is read from your own browser requests and kept in memory /
+        session storage only. It is never sent anywhere except graph.facebook.com.
+      </p>
+      <div class="row">
+        <button id="clearToken" class="secondary">Forget current session</button>
+        <span id="status" class="status"></span>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <span>Clean-room reimplementation. Not affiliated with Meta or Kitchn.io.</span>
+    </footer>
+  </main>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

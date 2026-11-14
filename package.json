@@ -1,0 +1,14 @@
+{
+  "name": "meta-ads-manager-clone-helper",
+  "version": "1.5.0",
+  "private": true,
+  "type": "module",
+  "description": "Clean-room Chrome extension for bulk Meta Ads Manager workflows",
+  "license": "MIT",
+  "scripts": {
+    "check": "node tools/check.mjs",
+    "test": "node tools/selftest.mjs && node tools/api-test.mjs && node tools/pool-test.mjs && node tools/smoke.mjs",
+    "icons": "node tools/make-icons.mjs",
+    "serve": "node tools/serve.mjs 8787"
+  }
+}
