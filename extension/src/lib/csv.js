@@ -31,16 +31,31 @@ export function downloadCsv(filename, csv) {
 }
 
 export async function copyText(text) {
+  // The sidebar iframe is embedded in adsmanager.facebook.com, whose
+  // Permissions-Policy blocks the async Clipboard API for cross-origin frames.
+  // The offscreen document copies outside that policy.
   try {
-    await navigator.clipboard.writeText(text);
-    return true;
+    const response = await chrome.runtime.sendMessage({ action: 'copyToClipboard', text });
+    if (response?.ok && response.result) return true;
   } catch {
-    const area = document.createElement('textarea');
-    area.value = text;
-    document.body.appendChild(area);
-    area.select();
-    const ok = document.execCommand('copy');
-    area.remove();
-    return ok;
+    // Background unavailable; fall through.
   }
+
+  // A top-level extension page (normal popup, options) may use the async API.
+  if (window.top === window) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Fall through to the legacy path.
+    }
+  }
+
+  const area = document.createElement('textarea');
+  area.value = text;
+  document.body.appendChild(area);
+  area.select();
+  const ok = document.execCommand('copy');
+  area.remove();
+  return ok;
 }

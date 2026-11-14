@@ -143,6 +143,7 @@ to `graph.facebook.com`.
 | `storage` | settings, session token, local run log |
 | `tabs` | read the current tab URL (ad selection) and reload the page |
 | `webRequest` | observe the Ads Manager Graph request that carries the token |
+| `offscreen` + `clipboardWrite` | copy previews and post IDs from the sidebar iframe, which the host page's Permissions-Policy otherwise blocks |
 | `host_permissions` | `*.facebook.com` (page + token) and `graph.facebook.com` (API) |
 
 There is no `<all_urls>`, no `scripting`, no remote server and no third-party analytics.
