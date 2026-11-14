@@ -244,7 +244,7 @@ the same four workflows, with no shared code or backend.
 
 Not affiliated with Meta or Kitchn.io. Use it only on ad accounts you own or are authorised
 to manage. Meta's Platform Terms and advertising policies apply to every Graph call made by
-the extension. Review the payload samples and test on paused ads before running large batches.
+the extension. Read the code and test on paused ads before running large batches.
 
 ## License
 
