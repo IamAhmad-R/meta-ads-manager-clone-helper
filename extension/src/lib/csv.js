@@ -30,32 +30,34 @@ export function downloadCsv(filename, csv) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export async function copyText(text) {
-  // The sidebar iframe is embedded in adsmanager.facebook.com, whose
-  // Permissions-Policy blocks the async Clipboard API for cross-origin frames.
-  // The offscreen document copies outside that policy.
-  try {
-    const response = await chrome.runtime.sendMessage({ action: 'copyToClipboard', text });
-    if (response?.ok && response.result) return true;
-  } catch {
-    // Background unavailable; fall through.
-  }
-
-  // A top-level extension page (normal popup, options) may use the async API.
-  if (window.top === window) {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      // Fall through to the legacy path.
-    }
-  }
-
+function legacyCopy(text) {
   const area = document.createElement('textarea');
   area.value = text;
+  area.setAttribute('readonly', '');
+  area.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
   document.body.appendChild(area);
+  area.focus();
   area.select();
-  const ok = document.execCommand('copy');
+  let ok = false;
+  try {
+    ok = document.execCommand('copy');
+  } catch {
+    ok = false;
+  }
   area.remove();
   return ok;
+}
+
+export async function copyText(text) {
+  // In the sidebar the helper runs in an iframe inside adsmanager.facebook.com.
+  // That page's Permissions-Policy blocks the async Clipboard API for
+  // cross-origin frames, so use the legacy command, which is not covered by it.
+  if (window.top !== window) return legacyCopy(text);
+
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return legacyCopy(text);
+  }
 }

@@ -56,41 +56,6 @@ function progress(message, current, total) {
   chrome.runtime.sendMessage({ action: 'progress', message, current, total }).catch(() => {});
 }
 
-let offscreenCreation = null;
-
-/**
- * Copies text from an extension offscreen document. The sidebar iframe lives
- * inside adsmanager.facebook.com, whose Permissions-Policy blocks the async
- * Clipboard API for embedded cross-origin frames.
- */
-async function copyViaOffscreen(text) {
-  if (!chrome.offscreen) return false;
-  try {
-    if (!(await chrome.offscreen.hasDocument())) {
-      if (!offscreenCreation) {
-        offscreenCreation = chrome.offscreen
-          .createDocument({
-            url: 'offscreen.html',
-            reasons: ['CLIPBOARD'],
-            justification: 'Copy preview CSV and post IDs to the clipboard',
-          })
-          .finally(() => {
-            offscreenCreation = null;
-          });
-      }
-      await offscreenCreation;
-    }
-    const response = await chrome.runtime.sendMessage({
-      target: 'offscreen',
-      type: 'copy',
-      text,
-    });
-    return Boolean(response?.ok);
-  } catch {
-    return false;
-  }
-}
-
 async function askSkip(adId, reason) {
   try {
     const answer = await chrome.runtime.sendMessage({ action: 'askSkip', adId, reason });
@@ -125,10 +90,6 @@ const handlers = {
     if (!adIds?.length) throw new Error('No ad selected.');
     const ad = await fetchAd(adIds[0]);
     return ad.account_id;
-  },
-
-  async copyToClipboard({ text }) {
-    return copyViaOffscreen(String(text ?? ''));
   },
 
   async adsets({ accountId, after, statuses }) {

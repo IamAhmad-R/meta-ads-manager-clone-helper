@@ -1,14 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Meta Ads Manager Clone Helper",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Clean-room Chrome extension for bulk creative-enhancement opt-outs, preview and post-ID export, carousel placement conversion and ad duplication in Meta Ads Manager.",
   "minimum_chrome_version": "116",
   "permissions": [
     "storage",
     "tabs",
     "webRequest",
-    "offscreen",
     "clipboardWrite"
   ],
   "host_permissions": [
